@@ -5,17 +5,28 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *******************************************************************************/
-package org.eclipse.xtext.formatting2.regionaccess;
+package org.eclipse.xtext.formatting2.regionaccess.internal;
+
+import org.eclipse.xtext.formatting2.regionaccess.ISemanticRegion;
+
+import com.google.common.base.Predicate;
 
 /**
  * @author Moritz Eysholdt - Initial contribution and API
  */
-public interface IEObjectRegion extends ISequentialRegion, IAstRegion {
-	ISemanticRegionsFinder getAllRegionsFor();
+public class SemanticRegionMatcher extends AbstractSemanticRegionsFinder {
 
-	Iterable<ISemanticRegion> getAllSemanticRegions();
+	private final ISemanticRegion region;
 
-	ISemanticRegionsFinder getRegionFor();
+	public SemanticRegionMatcher(ISemanticRegion region) {
+		super();
+		this.region = region;
+	}
 
-	Iterable<ISemanticRegion> getSemanticRegions();
+	@Override
+	protected ISemanticRegion findFirst(Predicate<ISemanticRegion> predicate) {
+		if (predicate.apply(region))
+			return region;
+		return null;
+	}
 }

@@ -18,7 +18,9 @@ import org.eclipse.xtend2.lib.StringConcatenation;
 import org.eclipse.xtext.CrossReference;
 import org.eclipse.xtext.Keyword;
 import org.eclipse.xtext.RuleCall;
+import org.eclipse.xtext.formatting2.regionaccess.IEObjectRegion;
 import org.eclipse.xtext.formatting2.regionaccess.ISemanticRegion;
+import org.eclipse.xtext.formatting2.regionaccess.ISemanticRegionsFinder;
 import org.eclipse.xtext.formatting2.regionaccess.ITextRegionAccess;
 import org.eclipse.xtext.formatting2.regionaccess.ITextSegment;
 import org.eclipse.xtext.formatting2.regionaccess.TextRegionAccessBuilder;
@@ -46,7 +48,7 @@ import org.junit.runner.RunWith;
 @RunWith(XtextRunner.class)
 @InjectWith(RegionAccessTestLanguageInjectorProvider.class)
 @SuppressWarnings("all")
-public class RegionAccessAccessTest {
+public class SemanticRegionFinderTest {
   @Inject
   @Extension
   private ParseHelper<Root> parseHelper;
@@ -67,9 +69,11 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (foo)");
     final Mixed mixed = this.<Mixed>parseAs(_builder, Mixed.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
-    final ISemanticRegion actual = access.regionForFeature(mixed, RegionaccesstestlanguagePackage.Literals.MIXED__NAME);
-    final List<ISemanticRegion> actuals = access.regionsForFeatures(mixed, RegionaccesstestlanguagePackage.Literals.MIXED__NAME);
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
+    final ISemanticRegion actual = finder.feature(RegionaccesstestlanguagePackage.Literals.MIXED__NAME);
+    final List<ISemanticRegion> actuals = finder.features(RegionaccesstestlanguagePackage.Literals.MIXED__NAME);
     this.assertEquals("foo", actual, actuals);
   }
   
@@ -78,11 +82,13 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (ref foo) action (foo) end");
     final AssignedAction mixed = this.<AssignedAction>parseAs(_builder, AssignedAction.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
     Mixed _child = mixed.getChild();
-    final ISemanticRegion actual = access.regionForFeature(_child, RegionaccesstestlanguagePackage.Literals.MIXED__REF);
-    Mixed _child_1 = mixed.getChild();
-    final List<ISemanticRegion> actuals = access.regionsForFeatures(_child_1, RegionaccesstestlanguagePackage.Literals.MIXED__REF);
+    final IEObjectRegion finder = _access.regionForEObject(_child);
+    ISemanticRegionsFinder _regionFor = finder.getRegionFor();
+    final ISemanticRegion actual = _regionFor.feature(RegionaccesstestlanguagePackage.Literals.MIXED__REF);
+    ISemanticRegionsFinder _regionFor_1 = finder.getRegionFor();
+    final List<ISemanticRegion> actuals = _regionFor_1.features(RegionaccesstestlanguagePackage.Literals.MIXED__REF);
     this.assertEquals("foo", actual, actuals);
   }
   
@@ -91,9 +97,11 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (foo) action");
     final AssignedAction mixed = this.<AssignedAction>parseAs(_builder, AssignedAction.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     try {
-      access.regionForFeature(mixed, RegionaccesstestlanguagePackage.Literals.ASSIGNED_ACTION__CHILD);
+      finder.feature(RegionaccesstestlanguagePackage.Literals.ASSIGNED_ACTION__CHILD);
       Assert.fail();
     } catch (final Throwable _t) {
       if (_t instanceof IllegalStateException) {
@@ -103,7 +111,7 @@ public class RegionAccessAccessTest {
       }
     }
     try {
-      access.regionsForFeatures(mixed, RegionaccesstestlanguagePackage.Literals.ASSIGNED_ACTION__CHILD);
+      finder.features(RegionaccesstestlanguagePackage.Literals.ASSIGNED_ACTION__CHILD);
       Assert.fail();
     } catch (final Throwable _t_1) {
       if (_t_1 instanceof IllegalStateException) {
@@ -119,13 +127,15 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (unassigned foo)");
     final Mixed mixed = this.<Mixed>parseAs(_builder, Mixed.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _iDTerminalRuleCall_1_1_0 = _mixedAccess.getIDTerminalRuleCall_1_1_0();
-    final ISemanticRegion actual = access.regionForRuleCall(mixed, _iDTerminalRuleCall_1_1_0);
+    final ISemanticRegion actual = finder.ruleCall(_iDTerminalRuleCall_1_1_0);
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess_1 = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _iDTerminalRuleCall_1_1_0_1 = _mixedAccess_1.getIDTerminalRuleCall_1_1_0();
-    final List<ISemanticRegion> actuals = access.regionsForRuleCalls(mixed, _iDTerminalRuleCall_1_1_0_1);
+    final List<ISemanticRegion> actuals = finder.ruleCalls(_iDTerminalRuleCall_1_1_0_1);
     this.assertEquals("foo", actual, actuals);
   }
   
@@ -134,13 +144,15 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (unassigned datatype foo)");
     final Mixed mixed = this.<Mixed>parseAs(_builder, Mixed.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _datatypeParserRuleCall_1_1_1 = _mixedAccess.getDatatypeParserRuleCall_1_1_1();
-    final ISemanticRegion actual = access.regionForRuleCall(mixed, _datatypeParserRuleCall_1_1_1);
+    final ISemanticRegion actual = finder.ruleCall(_datatypeParserRuleCall_1_1_1);
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess_1 = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _datatypeParserRuleCall_1_1_1_1 = _mixedAccess_1.getDatatypeParserRuleCall_1_1_1();
-    final List<ISemanticRegion> actuals = access.regionsForRuleCalls(mixed, _datatypeParserRuleCall_1_1_1_1);
+    final List<ISemanticRegion> actuals = finder.ruleCalls(_datatypeParserRuleCall_1_1_1_1);
     this.assertEquals("datatype foo", actual, actuals);
   }
   
@@ -149,13 +161,15 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (foo)");
     final Mixed mixed = this.<Mixed>parseAs(_builder, Mixed.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _nameIDTerminalRuleCall_2_2_0_0 = _mixedAccess.getNameIDTerminalRuleCall_2_2_0_0();
-    final ISemanticRegion actual = access.regionForRuleCall(mixed, _nameIDTerminalRuleCall_2_2_0_0);
+    final ISemanticRegion actual = finder.ruleCall(_nameIDTerminalRuleCall_2_2_0_0);
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess_1 = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _nameIDTerminalRuleCall_2_2_0_0_1 = _mixedAccess_1.getNameIDTerminalRuleCall_2_2_0_0();
-    final ISemanticRegion actuals = access.regionForRuleCall(mixed, _nameIDTerminalRuleCall_2_2_0_0_1);
+    final ISemanticRegion actuals = finder.ruleCall(_nameIDTerminalRuleCall_2_2_0_0_1);
     Assert.assertEquals("foo", actual, actuals);
   }
   
@@ -164,13 +178,15 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (datatype foo)");
     final Mixed mixed = this.<Mixed>parseAs(_builder, Mixed.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _datatypeDatatypeParserRuleCall_2_2_2_0 = _mixedAccess.getDatatypeDatatypeParserRuleCall_2_2_2_0();
-    final ISemanticRegion actual = access.regionForRuleCall(mixed, _datatypeDatatypeParserRuleCall_2_2_2_0);
+    final ISemanticRegion actual = finder.ruleCall(_datatypeDatatypeParserRuleCall_2_2_2_0);
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess_1 = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _datatypeDatatypeParserRuleCall_2_2_2_0_1 = _mixedAccess_1.getDatatypeDatatypeParserRuleCall_2_2_2_0();
-    final ISemanticRegion actuals = access.regionForRuleCall(mixed, _datatypeDatatypeParserRuleCall_2_2_2_0_1);
+    final ISemanticRegion actuals = finder.ruleCall(_datatypeDatatypeParserRuleCall_2_2_2_0_1);
     Assert.assertEquals("datatype foo", actual, actuals);
   }
   
@@ -179,15 +195,16 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (ref foo) action (foo) end");
     final AssignedAction mixed = this.<AssignedAction>parseAs(_builder, AssignedAction.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
     Mixed _child = mixed.getChild();
+    IEObjectRegion _regionForEObject = _access.regionForEObject(_child);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _refMixedIDTerminalRuleCall_2_2_3_1_0_1 = _mixedAccess.getRefMixedIDTerminalRuleCall_2_2_3_1_0_1();
-    final ISemanticRegion actual = access.regionForRuleCall(_child, _refMixedIDTerminalRuleCall_2_2_3_1_0_1);
-    Mixed _child_1 = mixed.getChild();
+    final ISemanticRegion actual = finder.ruleCall(_refMixedIDTerminalRuleCall_2_2_3_1_0_1);
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess_1 = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     RuleCall _refMixedIDTerminalRuleCall_2_2_3_1_0_1_1 = _mixedAccess_1.getRefMixedIDTerminalRuleCall_2_2_3_1_0_1();
-    final List<ISemanticRegion> actuals = access.regionsForRuleCalls(_child_1, _refMixedIDTerminalRuleCall_2_2_3_1_0_1_1);
+    final List<ISemanticRegion> actuals = finder.ruleCalls(_refMixedIDTerminalRuleCall_2_2_3_1_0_1_1);
     this.assertEquals("foo", actual, actuals);
   }
   
@@ -196,11 +213,13 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (child (foo))");
     final Mixed mixed = this.<Mixed>parseAs(_builder, Mixed.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     try {
       RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
       RuleCall _eobjMixedParserRuleCall_2_2_1_1_0 = _mixedAccess.getEobjMixedParserRuleCall_2_2_1_1_0();
-      access.regionForRuleCall(mixed, _eobjMixedParserRuleCall_2_2_1_1_0);
+      finder.ruleCall(_eobjMixedParserRuleCall_2_2_1_1_0);
       Assert.fail();
     } catch (final Throwable _t) {
       if (_t instanceof IllegalStateException) {
@@ -212,7 +231,7 @@ public class RegionAccessAccessTest {
     try {
       RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess_1 = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
       RuleCall _eobjMixedParserRuleCall_2_2_1_1_0_1 = _mixedAccess_1.getEobjMixedParserRuleCall_2_2_1_1_0();
-      access.regionsForRuleCalls(mixed, _eobjMixedParserRuleCall_2_2_1_1_0_1);
+      finder.ruleCalls(_eobjMixedParserRuleCall_2_2_1_1_0_1);
       Assert.fail();
     } catch (final Throwable _t_1) {
       if (_t_1 instanceof IllegalStateException) {
@@ -228,9 +247,11 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (foo)");
     final Mixed mixed = this.<Mixed>parseAs(_builder, Mixed.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
-    final ISemanticRegion actual = access.regionForKeyword(mixed, "(");
-    final List<ISemanticRegion> actuals = access.regionsForKeywords(mixed, "(");
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
+    final ISemanticRegion actual = finder.keyword("(");
+    final List<ISemanticRegion> actuals = finder.keywords("(");
     this.assertEquals("(", actual, actuals);
   }
   
@@ -239,13 +260,15 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (foo)");
     final Mixed mixed = this.<Mixed>parseAs(_builder, Mixed.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
+    IEObjectRegion _regionForEObject = _access.regionForEObject(mixed);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     Keyword _leftParenthesisKeyword_0 = _mixedAccess.getLeftParenthesisKeyword_0();
-    final ISemanticRegion actual = access.regionForKeyword(mixed, _leftParenthesisKeyword_0);
+    final ISemanticRegion actual = finder.keyword(_leftParenthesisKeyword_0);
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess_1 = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     Keyword _leftParenthesisKeyword_0_1 = _mixedAccess_1.getLeftParenthesisKeyword_0();
-    final List<ISemanticRegion> actuals = access.regionsForKeywords(mixed, _leftParenthesisKeyword_0_1);
+    final List<ISemanticRegion> actuals = finder.keywords(_leftParenthesisKeyword_0_1);
     this.assertEquals("(", actual, actuals);
   }
   
@@ -254,15 +277,16 @@ public class RegionAccessAccessTest {
     StringConcatenation _builder = new StringConcatenation();
     _builder.append("6 (ref foo) action (foo) end");
     final AssignedAction mixed = this.<AssignedAction>parseAs(_builder, AssignedAction.class);
-    final ITextRegionAccess access = this.toAccess(mixed);
+    ITextRegionAccess _access = this.toAccess(mixed);
     Mixed _child = mixed.getChild();
+    IEObjectRegion _regionForEObject = _access.regionForEObject(_child);
+    final ISemanticRegionsFinder finder = _regionForEObject.getRegionFor();
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     CrossReference _refMixedCrossReference_2_2_3_1_0 = _mixedAccess.getRefMixedCrossReference_2_2_3_1_0();
-    final ISemanticRegion actual = access.regionForCrossRef(_child, _refMixedCrossReference_2_2_3_1_0);
-    Mixed _child_1 = mixed.getChild();
+    final ISemanticRegion actual = finder.crossRef(_refMixedCrossReference_2_2_3_1_0);
     RegionAccessTestLanguageGrammarAccess.MixedElements _mixedAccess_1 = this._regionAccessTestLanguageGrammarAccess.getMixedAccess();
     CrossReference _refMixedCrossReference_2_2_3_1_0_1 = _mixedAccess_1.getRefMixedCrossReference_2_2_3_1_0();
-    final List<ISemanticRegion> actuals = access.regionsForCrossRefs(_child_1, _refMixedCrossReference_2_2_3_1_0_1);
+    final List<ISemanticRegion> actuals = finder.crossRefs(_refMixedCrossReference_2_2_3_1_0_1);
     this.assertEquals("foo", actual, actuals);
   }
   

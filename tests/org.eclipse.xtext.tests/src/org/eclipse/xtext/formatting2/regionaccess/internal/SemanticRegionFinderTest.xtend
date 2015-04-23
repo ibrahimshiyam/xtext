@@ -35,7 +35,7 @@ import com.google.common.collect.ImmutableList
  */
 @RunWith(XtextRunner)
 @InjectWith(RegionAccessTestLanguageInjectorProvider)
-class RegionAccessAccessTest {
+class SemanticRegionFinderTest {
 	@Inject extension ParseHelper<Root> parseHelper
 	@Inject Provider<TextRegionAccessBuilder> textRegionAccessBuilder
 	@Inject extension ValidationTestHelper validationTestHelper
@@ -43,30 +43,30 @@ class RegionAccessAccessTest {
 
 	@Test def void regionForFeatureAttribute() {
 		val mixed = '''6 (foo)'''.parseAs(Mixed)
-		val access = mixed.toAccess
-		val actual = access.regionForFeature(mixed, MIXED__NAME)
-		val actuals = access.regionsForFeatures(mixed, MIXED__NAME)
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
+		val actual = finder.feature(MIXED__NAME)
+		val actuals = finder.features(MIXED__NAME)
 		assertEquals("foo", actual, actuals)
 	}
 
 	@Test def void regionForFeatureCrossReference() {
 		val mixed = '''6 (ref foo) action (foo) end'''.parseAs(AssignedAction)
-		val access = mixed.toAccess
-		val actual = access.regionForFeature(mixed.child, MIXED__REF)
-		val actuals = access.regionsForFeatures(mixed.child, MIXED__REF)
+		val finder = mixed.toAccess.regionForEObject(mixed.child)
+		val actual = finder.regionFor.feature(MIXED__REF)
+		val actuals = finder.regionFor.features(MIXED__REF)
 		assertEquals("foo", actual, actuals)
 	}
 
 	@Test def void regionForFeatureContainmentReference() {
 		val mixed = '''6 (foo) action'''.parseAs(AssignedAction)
-		val access = mixed.toAccess
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
 		try {
-			access.regionForFeature(mixed, ASSIGNED_ACTION__CHILD)
+			finder.feature(ASSIGNED_ACTION__CHILD)
 			fail()
 		} catch (IllegalStateException e) {
 		}
 		try {
-			access.regionsForFeatures(mixed, ASSIGNED_ACTION__CHILD)
+			finder.features(ASSIGNED_ACTION__CHILD)
 			fail()
 		} catch (IllegalStateException e) {
 		}
@@ -74,54 +74,54 @@ class RegionAccessAccessTest {
 
 	@Test def void regionForRuleCallUnassignedTerminal() {
 		val mixed = '''6 (unassigned foo)'''.parseAs(Mixed)
-		val access = mixed.toAccess
-		val actual = access.regionForRuleCall(mixed, mixedAccess.IDTerminalRuleCall_1_1_0)
-		val actuals = access.regionsForRuleCalls(mixed, mixedAccess.IDTerminalRuleCall_1_1_0)
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
+		val actual = finder.ruleCall(mixedAccess.IDTerminalRuleCall_1_1_0)
+		val actuals = finder.ruleCalls(mixedAccess.IDTerminalRuleCall_1_1_0)
 		assertEquals("foo", actual, actuals)
 	}
 
 	@Test def void regionForRuleCallUnassignedDataType() {
 		val mixed = '''6 (unassigned datatype foo)'''.parseAs(Mixed)
-		val access = mixed.toAccess
-		val actual = access.regionForRuleCall(mixed, mixedAccess.datatypeParserRuleCall_1_1_1)
-		val actuals = access.regionsForRuleCalls(mixed, mixedAccess.datatypeParserRuleCall_1_1_1)
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
+		val actual = finder.ruleCall(mixedAccess.datatypeParserRuleCall_1_1_1)
+		val actuals = finder.ruleCalls(mixedAccess.datatypeParserRuleCall_1_1_1)
 		assertEquals("datatype foo", actual, actuals)
 	}
 
 	@Test def void regionForRuleCallAssignedTerminal() {
 		val mixed = '''6 (foo)'''.parseAs(Mixed)
-		val access = mixed.toAccess
-		val actual = access.regionForRuleCall(mixed, mixedAccess.nameIDTerminalRuleCall_2_2_0_0)
-		val actuals = access.regionForRuleCall(mixed, mixedAccess.nameIDTerminalRuleCall_2_2_0_0)
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
+		val actual = finder.ruleCall(mixedAccess.nameIDTerminalRuleCall_2_2_0_0)
+		val actuals = finder.ruleCall(mixedAccess.nameIDTerminalRuleCall_2_2_0_0)
 		assertEquals("foo", actual, actuals)
 	}
 
 	@Test def void regionForRuleCallAssignedDataType() {
 		val mixed = '''6 (datatype foo)'''.parseAs(Mixed)
-		val access = mixed.toAccess
-		val actual = access.regionForRuleCall(mixed, mixedAccess.datatypeDatatypeParserRuleCall_2_2_2_0)
-		val actuals = access.regionForRuleCall(mixed, mixedAccess.datatypeDatatypeParserRuleCall_2_2_2_0)
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
+		val actual = finder.ruleCall(mixedAccess.datatypeDatatypeParserRuleCall_2_2_2_0)
+		val actuals = finder.ruleCall(mixedAccess.datatypeDatatypeParserRuleCall_2_2_2_0)
 		assertEquals("datatype foo", actual, actuals)
 	}
 
 	@Test def void regionForRuleCallCrossReference() {
 		val mixed = '''6 (ref foo) action (foo) end'''.parseAs(AssignedAction)
-		val access = mixed.toAccess
-		val actual = access.regionForRuleCall(mixed.child, mixedAccess.refMixedIDTerminalRuleCall_2_2_3_1_0_1)
-		val actuals = access.regionsForRuleCalls(mixed.child, mixedAccess.refMixedIDTerminalRuleCall_2_2_3_1_0_1)
+		val finder = mixed.toAccess.regionForEObject(mixed.child).regionFor
+		val actual = finder.ruleCall(mixedAccess.refMixedIDTerminalRuleCall_2_2_3_1_0_1)
+		val actuals = finder.ruleCalls(mixedAccess.refMixedIDTerminalRuleCall_2_2_3_1_0_1)
 		assertEquals("foo", actual, actuals)
 	}
 
 	@Test def void regionForRuleCallEObjectParserRule() {
 		val mixed = '''6 (child (foo))'''.parseAs(Mixed)
-		val access = mixed.toAccess
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
 		try {
-			access.regionForRuleCall(mixed, mixedAccess.eobjMixedParserRuleCall_2_2_1_1_0)
+			finder.ruleCall(mixedAccess.eobjMixedParserRuleCall_2_2_1_1_0)
 			fail()
 		} catch (IllegalStateException e) {
 		}
 		try {
-			access.regionsForRuleCalls(mixed, mixedAccess.eobjMixedParserRuleCall_2_2_1_1_0)
+			finder.ruleCalls(mixedAccess.eobjMixedParserRuleCall_2_2_1_1_0)
 			fail()
 		} catch (IllegalStateException e) {
 		}
@@ -129,25 +129,25 @@ class RegionAccessAccessTest {
 
 	@Test def void regionForKeywordString() {
 		val mixed = '''6 (foo)'''.parseAs(Mixed)
-		val access = mixed.toAccess
-		val actual = access.regionForKeyword(mixed, "(")
-		val actuals = access.regionsForKeywords(mixed, "(")
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
+		val actual = finder.keyword("(")
+		val actuals = finder.keywords("(")
 		assertEquals("(", actual, actuals)
 	}
 
 	@Test def void regionForKeyword() {
 		val mixed = '''6 (foo)'''.parseAs(Mixed)
-		val access = mixed.toAccess
-		val actual = access.regionForKeyword(mixed, mixedAccess.leftParenthesisKeyword_0)
-		val actuals = access.regionsForKeywords(mixed, mixedAccess.leftParenthesisKeyword_0)
+		val finder = mixed.toAccess.regionForEObject(mixed).regionFor
+		val actual = finder.keyword(mixedAccess.leftParenthesisKeyword_0)
+		val actuals = finder.keywords(mixedAccess.leftParenthesisKeyword_0)
 		assertEquals("(", actual, actuals)
 	}
 
 	@Test def void regionForCrossReference() {
 		val mixed = '''6 (ref foo) action (foo) end'''.parseAs(AssignedAction)
-		val access = mixed.toAccess
-		val actual = access.regionForCrossRef(mixed.child, mixedAccess.refMixedCrossReference_2_2_3_1_0)
-		val actuals = access.regionsForCrossRefs(mixed.child, mixedAccess.refMixedCrossReference_2_2_3_1_0)
+		val finder = mixed.toAccess.regionForEObject(mixed.child).regionFor
+		val actual = finder.crossRef(mixedAccess.refMixedCrossReference_2_2_3_1_0)
+		val actuals = finder.crossRefs(mixedAccess.refMixedCrossReference_2_2_3_1_0)
 		assertEquals("foo", actual, actuals)
 	}
 
